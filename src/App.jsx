@@ -18,21 +18,21 @@ function App() {
       const apiUrl = '/api/summarize';
 
       const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'stringify',
-        },
-        body: JSON.stringify({ text: inputText }),
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ text: inputText }),
       });
 
-      const responseData = await response.json();
+      const responseText = await response.text();
 
       if (!response.ok) {
-        // If the server returns an error (like 503, 400, 500), throw it
-        throw new Error(responseData.error || `Request failed with status ${response.status}`);
+      // If the server returns an error (like 503, 400, 500), throw it
+      throw new Error(responseText || `Request failed with status ${response.status}`);
       }
 
-      setSummary(responseData.summary);
+      setSummary(responseText);
 
     } catch (err) {
       console.error("Summarization Error:", err);
@@ -40,7 +40,7 @@ function App() {
     } finally {
       setIsLoading(false);
     }
-  };
+    };
 
   return (
     <div className="container">
