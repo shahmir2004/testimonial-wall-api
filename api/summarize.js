@@ -15,14 +15,14 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
+
+
 const ai = new GoogleGenAI({});
 
-async function main() {
+export async function main() {
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",
-    contents: "Explain how AI works in a few words",
+    contents: "Explain how AI works in a 100 words",
   });
-  console.log(response.text);
+  return response.text;
 }
-
-main();
