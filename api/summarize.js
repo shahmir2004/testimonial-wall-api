@@ -2,7 +2,7 @@
 
 import dotenv from 'dotenv';
 import path from 'path';
-import { GoogleGenAI } from "@google/genai";s
+import { GoogleGenAI } from "@google/genai";
 // Load .env.local in development
 if (process.env.NODE_ENV !== 'production') {
   const envPath = path.resolve(process.cwd(), '.env.local');
