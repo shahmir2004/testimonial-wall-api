@@ -32,11 +32,11 @@ export default async function handler(req, res) {
     if (!text || typeof text !== 'string' || text.trim().length < 10) { /* ... */ }
 
     // --- 3. Call the Google Gemini API ---
-    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${geminiApiKey}`;
+    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`;
 
     const prompt = `You are a marketing assistant. Summarize the following customer testimonial into a single, punchy, and positive sentence suitable for a website's 'Wall of Love'. Focus on the core benefit or emotion. Do not add any extra text or quotation marks, just the summarized sentence. Testimonial: "${text}"`;
     
-    const geminiResponse = await fetch(GEMINI_API_URL, {
+       const geminiResponse = await fetch(GEMINI_API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -49,6 +49,10 @@ export default async function handler(req, res) {
     if (!geminiResponse.ok) {
         console.error("Gemini API Error Response:", result);
         throw new Error(result.error?.message || 'Failed to get summary from Gemini AI.');
+    }
+     // Safety check for the response structure
+    if (!result.candidates || !result.candidates[0] || !result.candidates[0].content || !result.candidates[0].content.parts || !result.candidates[0].content.parts[0]) {
+        throw new Error('AI returned an unexpected response structure.');
     }
 
     const summary = result.candidates[0]?.content?.parts[0]?.text;
