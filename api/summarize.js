@@ -32,7 +32,7 @@ export default async function handler(req, res) {
     // Call the Hugging Face API using the SDK
     const hf = new InferenceClient(hfApiKey);
     const result = await hf.summarization({
-      model: "facebook/bart-large-cnn",
+      model: "Falconsai/text_summarization",
       inputs: text,
     });
 
