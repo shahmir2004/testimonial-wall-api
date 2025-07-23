@@ -1,5 +1,5 @@
 // api/ai/summarize.js
-import { createClient } from '@supabase/supabase-js';
+
 import dotenv from 'dotenv';
 import path from 'path';
 
@@ -23,20 +23,10 @@ export default async function handler(req, res) {
   try {
     // --- Environment Variable Checks ---
     const geminiApiKey = process.env.TSW_GEMINI_API_KEY;
-    const supabaseUrl = process.env.TSW_SUPABASE_URL;
-    const supabaseKey = process.env.TSW_SUPABASE_ANON_KEY;
+    
 
     if (!geminiApiKey) throw new Error('Server Config Error: Missing TSW_GEMINI_API_KEY.');
-    if (!supabaseUrl || !supabaseKey) throw new Error('Server Config Error: Missing Supabase keys.');
-
-    // --- Authenticate the user (remains the same) ---
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) { /* ... */ }
-    const jwt = authHeader.split(' ')[1];
-    const supabase = createClient(supabaseUrl, supabaseKey);
-    const { data: { user }, error: userError } = await supabase.auth.getUser(jwt);
-    if (userError || !user) { /* ... */ }
-
+    
     // --- Validate the request body (remains the same) ---
     const { text } = req.body;
     if (!text || typeof text !== 'string' || text.trim().length < 10) { /* ... */ }
