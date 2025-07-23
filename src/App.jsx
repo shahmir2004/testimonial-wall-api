@@ -20,7 +20,7 @@ function App() {
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'stringify',
         },
         body: JSON.stringify({ text: inputText }),
       });
