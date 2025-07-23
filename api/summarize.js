@@ -32,10 +32,11 @@ export default async function handler(req, res) {
     if (!text || typeof text !== 'string' || text.trim().length < 10) { /* ... */ }
 
     // --- 3. Call the Google Gemini API ---
-    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`;
+     const model = 'gemini-1.5-flash-latest'; // Use the fast and powerful Flash model
+    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`;
 
     const prompt = `You are a marketing assistant. Summarize the following customer testimonial into a single, punchy, and positive sentence suitable for a website's 'Wall of Love'. Focus on the core benefit or emotion. Do not add any extra text or quotation marks, just the summarized sentence. Testimonial: "${text}"`;
-    
+
        const geminiResponse = await fetch(GEMINI_API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -46,31 +47,33 @@ export default async function handler(req, res) {
 
     const result = await geminiResponse.json();
 
+
     if (!geminiResponse.ok) {
-        console.error("Gemini API Error Response:", result);
-        throw new Error(result.error?.message || 'Failed to get summary from Gemini AI.');
-    }
-     // Safety check for the response structure
-    if (!result.candidates || !result.candidates[0] || !result.candidates[0].content || !result.candidates[0].content.parts || !result.candidates[0].content.parts[0]) {
-        throw new Error('AI returned an unexpected response structure.');
+      console.error("Gemini API Error Response:", result);
+      // Extract the specific error message from Google's response object
+      const errorMessage = result.error?.message || 'Failed to get summary from Gemini AI.';
+      throw new Error(errorMessage);
     }
 
-    const summary = result.candidates[0]?.content?.parts[0]?.text;
+    // Safely access the nested summary text
+    const summary = result.candidates?.[0]?.content?.parts?.[0]?.text;
     
     if (!summary) {
-        throw new Error('AI failed to produce a valid summary.');
+      console.error("Unexpected Gemini Response Structure:", result);
+      throw new Error('AI returned an unexpected response structure.');
     }
 
-    // --- 4. Return Success ---
+    // 4. Return the successful response
     return new Response(JSON.stringify({ summary: summary.trim() }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
-    console.error("Critical Error in ai/summarize function:", error);
+    console.error("Critical Error in summarize function:", error);
     return new Response(JSON.stringify({ error: error.message || 'An internal server error occurred.' }), {
-      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 }
