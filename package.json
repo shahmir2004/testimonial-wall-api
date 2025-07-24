@@ -1,7 +1,8 @@
 {
-  "name": "hf-tester",
-  "private": true,
-  "version": "0.0.0",
+   "name": "testimonial-wall-api",
+  "version": "1.0.0",
+  "description": "Backend API for the Testimonial Wall SaaS",
+  "main": "server.js",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,15 +11,20 @@
     "lint": "eslint .",
     "preview": "vite preview"
   },
+  "keywords": [],
+  "author": "Shahmir Ahmed",
+  "license": "ISC",
   "dependencies": {
     "@google/genai": "^1.10.0",
     "@google/generative-ai": "^0.24.1",
     "@huggingface/inference": "^4.5.3",
+    "@supabase/supabase-js": "^2.44.4",
     "cors": "^2.8.5",
     "dotenv": "^17.2.0",
     "express": "^5.1.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "nodemailer": "^6.9.14",
     "vercel": "^44.5.3"
   },
   "devDependencies": {
@@ -30,6 +36,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.3.0",
+    "nodemon": "^3.1.4",
     "vite": "^7.0.4"
   }
 }
