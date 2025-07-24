@@ -1,5 +1,4 @@
 // hf-tester/api/summarize.js
-// This function now uses the official @google/generative-ai SDK.
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const corsHeaders = {
@@ -15,10 +14,14 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 1. Get the secret Gemini API key from environment variables
+    // 1. Get the secret Gemini API key directly from process.env
+    // This is the variable you MUST set in your Vercel project settings.
     const geminiApiKey = process.env.GEMINI_API_KEY;
+
+    // A hard check to ensure the variable is loaded in the Vercel environment.
     if (!geminiApiKey) {
-      throw new Error('Server Config Error: Missing GEMINI_API_KEY environment variable.');
+      console.error("CRITICAL: GEMINI_API_KEY environment variable not found in function runtime.");
+      throw new Error('Server is not configured correctly. API key is missing.');
     }
 
     // 2. Get the text from the request body
@@ -31,16 +34,10 @@ export default async function handler(req, res) {
     }
     
     // 3. Call the Google Gemini API using the SDK
-    // Initialize the client with your API key
     const genAI = new GoogleGenerativeAI(geminiApiKey);
-
-    // Get the generative model
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+    const prompt = `You are a marketing assistant. Summarize the following customer testimonial into one punchy, positive sentence. Focus on the core benefit or emotion. Do not add any extra text or quotation marks, just the summarized sentence. Testimonial: "${text}"`;
 
-    // Construct the prompt
-    const prompt = `You are a marketing assistant. Summarize the following customer testimonial into a single, punchy, and positive sentence suitable for a website's 'Wall of Love'. Focus on the core benefit or emotion. Do not add any extra text or quotation marks, just the summarized sentence. Testimonial: "${text}"`;
-
-    // Generate the content
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const summary = response.text();
@@ -56,8 +53,7 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error("Critical Error in summarize function:", error);
-    // The SDK often provides a more detailed error message
+    console.error("Error in summarize function:", error);
     const errorMessage = error.message || 'An internal server error occurred.';
     return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
