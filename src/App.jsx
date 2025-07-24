@@ -23,7 +23,7 @@ function App() {
 
     try {
       // 2. Define the API endpoint for our Vercel Serverless Function
-      const apiUrl = '/api/summarize';
+      const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/summarize`;
 
       // 3. Make the POST request to our backend
       const response = await fetch(apiUrl, {
