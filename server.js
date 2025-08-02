@@ -121,6 +121,51 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
+app.post('/api/testimonials/submit', async (req, res) => {
+  try {
+    // For this public endpoint, we create a client with the anon key
+    const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
+    
+    const { author_name, author_title, testimonial_text, userId } = req.body;
+
+    // --- Validation ---
+    if (!author_name || !testimonial_text || !userId) {
+      return res.status(400).json({ error: 'Missing required fields: author_name, testimonial_text, and userId are required.' });
+    }
+    // A simple check to see if userId is a valid UUID format
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(userId)) {
+        return res.status(400).json({ error: 'Invalid User ID format.' });
+    }
+
+    // --- Insert the new testimonial into the database ---
+    // The RLS policy we will create will ensure this is allowed.
+    const { data, error } = await supabase
+      .from('testimonials')
+      .insert({
+        author_name: author_name,
+        author_title: author_title || null, // Ensure optional fields are null if empty
+        testimonial_text: testimonial_text,
+        user_id: userId,
+        is_published: false // <<-- IMPORTANT: New testimonials always come in as drafts (unpublished)
+      });
+
+    if (error) {
+      console.error("Supabase insert error:", error);
+      throw new Error(error.message);
+    }
+    
+    // Optional: Update the status of a request link if you are tracking it in a `requests` table
+
+    return res.status(200).json({ success: true, message: 'Thank you for your feedback!' });
+
+  } catch (error) {
+    console.error("Error in /api/testimonials/submit:", error);
+    return res.status(500).json({ error: error.message || 'An internal server error occurred.' });
+  }
+});
+
+
 // --- 3. Root Endpoint for Health Check ---
 app.get('/', (req, res) => {
   res.status(200).send('Testimonial Wall API is alive and running!');
