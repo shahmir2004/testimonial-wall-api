@@ -78,46 +78,45 @@ app.post('/api/summarize', async (req, res) => {
   }
 });
 
-// --- 2. Contact Form Endpoint ---
+// --- 3. NEW/VERIFIED: Contact Form Endpoint ---
 app.post('/api/contact', async (req, res) => {
   try {
-    const { name, email, message } = req.body;
-    if (!name || !email || !message) {
+    const { name, email, subject, message } = req.body;
+    if (!name || !email || !subject || !message) {
       return res.status(400).json({ success: false, message: 'All fields are required.' });
     }
+
+    // You can add more validation here if you wish
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: process.env.EMAIL_USER_SENDER,
-        pass: process.env.EMAIL_PASS_SENDER,
+        user: process.env.EMAIL_USER_SENDER, // Your sending email
+        pass: process.env.EMAIL_PASS_SENDER, // Your app password
       },
     });
 
-    // Email to you
-    const mailToOwnerOptions = {
-      from: `"Portfolio Contact <${process.env.EMAIL_USER_SENDER}>"`,
-      to: process.env.EMAIL_RECEIVER,
-      replyTo: email,
-      subject: `New Contact Form Submission from ${name}`,
-      html: `...`, // Your HTML email body
+    const mailOptions = {
+      from: `"${name}" <${process.env.EMAIL_USER_SENDER}>`, // Use user's name but your email
+      to: process.env.EMAIL_RECEIVER, // The email where you receive messages
+      replyTo: email, // So you can reply directly to the user
+      subject: `[Testimonial Wall Contact] - ${subject}`,
+      html: `
+        <h3>New Message from Testimonial Wall Contact Form</h3>
+        <p><strong>From:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <hr>
+        <p><strong>Message:</strong></p>
+        <p>${message.replace(/\n/g, '<br>')}</p>
+      `,
     };
-    await transporter.sendMail(mailToOwnerOptions);
 
-    // Confirmation email to user
-    const mailToUserOptions = {
-      from: `"Shahmir Ahmed - Portfolio <${process.env.EMAIL_USER_SENDER}>"`,
-      to: email,
-      subject: "Thanks for contacting me!",
-      html: `...`, // Your HTML confirmation body
-    };
-    await transporter.sendMail(mailToUserOptions);
-
-    return res.status(200).json({ success: true, message: 'Message sent successfully!' });
+    await transporter.sendMail(mailOptions);
+    return res.status(200).json({ success: true, message: 'Your message has been sent successfully!' });
 
   } catch (error) {
     console.error("Error in /api/contact:", error);
-    return res.status(500).json({ success: false, message: 'Failed to send message.' });
+    return res.status(500).json({ success: false, message: 'Failed to send message. Please try again later.' });
   }
 });
 
